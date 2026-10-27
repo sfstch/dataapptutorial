@@ -5,6 +5,8 @@ import { CommonModule } from "@angular/common";
 import { Header } from "./header/header";
 import  { Footer } from  "./footer/footer";
 import  { FormsModule} from '@angular/forms';
+import { NoteService } from "./services/note";
+
 
 @Component({
   imports: [CommonModule, Header, Footer, FormsModule],
@@ -13,6 +15,7 @@ import  { FormsModule} from '@angular/forms';
   templateUrl: "./app.html",
 })
 export class App {
+  constructor(private noteService: NoteService) {}
 
   handleSubscribe(){
     console.log("all is working");
@@ -24,21 +27,10 @@ export class App {
   }
 
   title = "Hello World on  my website"
-  
-  protected readonly notes = signal<Note[]>([
-    {
-      id: 1,
-      title: "Первая заметка",
-      content: "Привет, это наша первая заметка!",
-      createdAt: new Date(),
-    },
-    {
-      id: 2,
-      title: "Вторая заметка",
-      content: "Angular-это удобно",
-      createdAt: new Date(),
-    },
-  ]);
+
+  protected get notes(){
+    return this.noteService.getNotes();
+  }
 
   protected newNote = signal<Partial<Note>>({
     title: '',
@@ -49,14 +41,7 @@ export class App {
     const noteData  = this.newNote();
     if(!noteData.title || !noteData.content) return ;
 
-    const newNote: Note = {
-      id: Date.now(),
-      title: noteData.title,
-      content: noteData.content,
-      createdAt: new Date()
-    };
-
-    this.notes.update(notes => [...notes, newNote]);
+    this.noteService.addNote(noteData.title, noteData.content);
 
     this.newNote.set({
       title: '',
